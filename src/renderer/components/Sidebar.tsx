@@ -4,7 +4,9 @@ import '../styles/sidebar.css'
 
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/' },
-  { id: 'files', label: 'File Manager', icon: '📁', path: '/files' },
+  { id: 'projects', label: 'Projects', icon: '📁', path: '/projects' },
+  { id: 'tasks', label: 'Tasks', icon: '✓', path: '/tasks' },
+  { id: 'files', label: 'File Manager', icon: '📂', path: '/files' },
   { id: 'terminal', label: 'Terminal', icon: '💻', path: '/terminal' },
   { id: 'processes', label: 'Processes', icon: '⚙️', path: '/processes' },
   { id: 'network', label: 'Network', icon: '🌐', path: '/network' },
