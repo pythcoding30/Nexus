@@ -15,9 +15,9 @@ export interface Task {
   status: 'todo' | 'in_progress' | 'done' | 'cancelled'
   priority: 'low' | 'medium' | 'high' | 'urgent'
   due_date: string | null
+  assignee_id: number | null
   created_at: string
   updated_at: string
-  assignee_id?: number
   position?: number
 }
 
@@ -106,3 +106,30 @@ export type CreateReport = Omit<Report, 'id' | 'created_at' | 'updated_at'>
 export type UpdateReport = Partial<CreateReport>
 
 export type CreateLabel = Omit<Label, 'id' | 'created_at'>
+
+export interface CreatorNote {
+  id: number
+  creator_id: number
+  title: string
+  content: string
+  created_at: string
+  updated_at: string
+}
+
+export interface PerformanceReport {
+  id: number
+  creator_id: number
+  title: string
+  description: string | null
+  file_name: string
+  file_path: string
+  file_size: number
+  file_type: string
+  uploaded_at: string
+}
+
+export type CreateCreatorNote = Omit<CreatorNote, 'id' | 'created_at' | 'updated_at'>
+export type UpdateCreatorNote = Partial<CreateCreatorNote>
+
+export type CreatePerformanceReport = Omit<PerformanceReport, 'id' | 'uploaded_at'>
+export type UpdatePerformanceReport = Partial<Omit<CreatePerformanceReport, 'file_path' | 'file_name' | 'file_size' | 'file_type'>>

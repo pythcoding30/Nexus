@@ -7,7 +7,9 @@ import {
   CreateCreator, UpdateCreator,
   CreateMeetingNote, UpdateMeetingNote,
   CreateReport, UpdateReport,
-  CreateLabel
+  CreateLabel,
+  CreateCreatorNote, UpdateCreatorNote,
+  CreatePerformanceReport, UpdatePerformanceReport
 } from '../../shared/database-types'
 
 interface IpcResponse<T = unknown> {
@@ -485,6 +487,129 @@ export function registerDatabaseHandlers(): void {
         return { success: false, error: 'Failed to update member role' }
       }
       return { success: true }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:creatorNotes:getAll', async (_event: IpcMainInvokeEvent, creatorId: number): Promise<IpcResponse> => {
+    try {
+      const notes = databaseService.getCreatorNotes(creatorId)
+      return { success: true, data: notes }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:creatorNotes:get', async (_event: IpcMainInvokeEvent, id: number): Promise<IpcResponse> => {
+    try {
+      const note = databaseService.getCreatorNote(id)
+      if (!note) {
+        return { success: false, error: 'Note not found' }
+      }
+      return { success: true, data: note }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:creatorNotes:create', async (_event: IpcMainInvokeEvent, data: CreateCreatorNote): Promise<IpcResponse> => {
+    try {
+      if (!data.title || data.title.trim().length === 0) {
+        return { success: false, error: 'Note title is required' }
+      }
+      const note = databaseService.createCreatorNote(data)
+      return { success: true, data: note }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:creatorNotes:update', async (_event: IpcMainInvokeEvent, id: number, data: UpdateCreatorNote): Promise<IpcResponse> => {
+    try {
+      const note = databaseService.updateCreatorNote(id, data)
+      if (!note) {
+        return { success: false, error: 'Note not found' }
+      }
+      return { success: true, data: note }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:creatorNotes:delete', async (_event: IpcMainInvokeEvent, id: number): Promise<IpcResponse> => {
+    try {
+      const success = databaseService.deleteCreatorNote(id)
+      if (!success) {
+        return { success: false, error: 'Note not found' }
+      }
+      return { success: true }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:performanceReports:getAll', async (_event: IpcMainInvokeEvent, creatorId: number): Promise<IpcResponse> => {
+    try {
+      const reports = databaseService.getPerformanceReports(creatorId)
+      return { success: true, data: reports }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:performanceReports:get', async (_event: IpcMainInvokeEvent, id: number): Promise<IpcResponse> => {
+    try {
+      const report = databaseService.getPerformanceReport(id)
+      if (!report) {
+        return { success: false, error: 'Report not found' }
+      }
+      return { success: true, data: report }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:performanceReports:create', async (_event: IpcMainInvokeEvent, data: CreatePerformanceReport): Promise<IpcResponse> => {
+    try {
+      if (!data.title || data.title.trim().length === 0) {
+        return { success: false, error: 'Report title is required' }
+      }
+      const report = databaseService.createPerformanceReport(data)
+      return { success: true, data: report }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:performanceReports:update', async (_event: IpcMainInvokeEvent, id: number, data: UpdatePerformanceReport): Promise<IpcResponse> => {
+    try {
+      const report = databaseService.updatePerformanceReport(id, data)
+      if (!report) {
+        return { success: false, error: 'Report not found' }
+      }
+      return { success: true, data: report }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:performanceReports:delete', async (_event: IpcMainInvokeEvent, id: number): Promise<IpcResponse> => {
+    try {
+      const success = databaseService.deletePerformanceReport(id)
+      if (!success) {
+        return { success: false, error: 'Report not found' }
+      }
+      return { success: true }
+    } catch (error) {
+      return handleError(error)
+    }
+  })
+
+  ipcMain.handle('db:tasks:getByAssignee', async (_event: IpcMainInvokeEvent, creatorId: number): Promise<IpcResponse> => {
+    try {
+      const tasks = databaseService.getTasksByAssignee(creatorId)
+      return { success: true, data: tasks }
     } catch (error) {
       return handleError(error)
     }

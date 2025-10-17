@@ -6,6 +6,7 @@ const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/' },
   { id: 'projects', label: 'Projects', icon: '📁', path: '/projects' },
   { id: 'tasks', label: 'Tasks', icon: '✓', path: '/tasks' },
+  { id: 'creators', label: 'Creators Hub', icon: '👥', path: '/creators' },
   { id: 'files', label: 'File Manager', icon: '📂', path: '/files' },
   { id: 'terminal', label: 'Terminal', icon: '💻', path: '/terminal' },
   { id: 'processes', label: 'Processes', icon: '⚙️', path: '/processes' },

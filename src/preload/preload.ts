@@ -1,13 +1,16 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type {
   Project, Task, Page, Creator, MeetingNote, Report, Label,
+  CreatorNote, PerformanceReport,
   CreateProject, UpdateProject,
   CreateTask, UpdateTask,
   CreatePage, UpdatePage,
   CreateCreator, UpdateCreator,
   CreateMeetingNote, UpdateMeetingNote,
   CreateReport, UpdateReport,
-  CreateLabel
+  CreateLabel,
+  CreateCreatorNote, UpdateCreatorNote,
+  CreatePerformanceReport, UpdatePerformanceReport
 } from '../shared/database-types'
 
 interface IpcResponse<T = unknown> {
@@ -36,7 +39,8 @@ const databaseAPI = {
     delete: (id: number): Promise<IpcResponse> => ipcRenderer.invoke('db:tasks:delete', id),
     getLabels: (taskId: number): Promise<IpcResponse<Label[]>> => ipcRenderer.invoke('db:tasks:getLabels', taskId),
     addLabel: (taskId: number, labelId: number): Promise<IpcResponse> => ipcRenderer.invoke('db:tasks:addLabel', taskId, labelId),
-    removeLabel: (taskId: number, labelId: number): Promise<IpcResponse> => ipcRenderer.invoke('db:tasks:removeLabel', taskId, labelId)
+    removeLabel: (taskId: number, labelId: number): Promise<IpcResponse> => ipcRenderer.invoke('db:tasks:removeLabel', taskId, labelId),
+    getByAssignee: (creatorId: number): Promise<IpcResponse<Task[]>> => ipcRenderer.invoke('db:tasks:getByAssignee', creatorId)
   },
   pages: {
     getAll: (parentId?: number | null): Promise<IpcResponse<Page[]>> => ipcRenderer.invoke('db:pages:getAll', parentId),
@@ -71,7 +75,29 @@ const databaseAPI = {
     get: (id: number): Promise<IpcResponse<Label>> => ipcRenderer.invoke('db:labels:get', id),
     create: (data: CreateLabel): Promise<IpcResponse<Label>> => ipcRenderer.invoke('db:labels:create', data),
     delete: (id: number): Promise<IpcResponse> => ipcRenderer.invoke('db:labels:delete', id)
+  },
+  creatorNotes: {
+    getAll: (creatorId: number): Promise<IpcResponse<CreatorNote[]>> => ipcRenderer.invoke('db:creatorNotes:getAll', creatorId),
+    get: (id: number): Promise<IpcResponse<CreatorNote>> => ipcRenderer.invoke('db:creatorNotes:get', id),
+    create: (data: CreateCreatorNote): Promise<IpcResponse<CreatorNote>> => ipcRenderer.invoke('db:creatorNotes:create', data),
+    update: (id: number, data: UpdateCreatorNote): Promise<IpcResponse<CreatorNote>> => ipcRenderer.invoke('db:creatorNotes:update', id, data),
+    delete: (id: number): Promise<IpcResponse> => ipcRenderer.invoke('db:creatorNotes:delete', id)
+  },
+  performanceReports: {
+    getAll: (creatorId: number): Promise<IpcResponse<PerformanceReport[]>> => ipcRenderer.invoke('db:performanceReports:getAll', creatorId),
+    get: (id: number): Promise<IpcResponse<PerformanceReport>> => ipcRenderer.invoke('db:performanceReports:get', id),
+    create: (data: CreatePerformanceReport): Promise<IpcResponse<PerformanceReport>> => ipcRenderer.invoke('db:performanceReports:create', data),
+    update: (id: number, data: UpdatePerformanceReport): Promise<IpcResponse<PerformanceReport>> => ipcRenderer.invoke('db:performanceReports:update', id, data),
+    delete: (id: number): Promise<IpcResponse> => ipcRenderer.invoke('db:performanceReports:delete', id)
   }
+}
+
+const fileAPI = {
+  selectFile: (): Promise<IpcResponse<string>> => ipcRenderer.invoke('file:selectFile'),
+  saveUpload: (sourcePath: string, fileName: string): Promise<IpcResponse<{ file_name: string; file_path: string; file_size: number; file_type: string }>> => 
+    ipcRenderer.invoke('file:saveUpload', sourcePath, fileName),
+  openExternal: (filePath: string): Promise<IpcResponse> => ipcRenderer.invoke('file:openExternal', filePath),
+  deleteUpload: (filePath: string): Promise<IpcResponse> => ipcRenderer.invoke('file:deleteUpload', filePath)
 }
 
 const api = {
@@ -93,7 +119,8 @@ const api = {
       ipcRenderer.on(channel, (_event, ...args) => func(...args))
     }
   },
-  database: databaseAPI
+  database: databaseAPI,
+  file: fileAPI
 }
 
 contextBridge.exposeInMainWorld('electronAPI', api)
