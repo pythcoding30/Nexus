@@ -1,48 +1,53 @@
-# Nexus - Electron + React UI Framework
+# Nexus OS
 
-A modern desktop application framework built with Electron, React, TypeScript, Tailwind CSS, and shadcn/ui components, designed with a dark theme.
+A modern Electron + React application shell with modular architecture and dark theme.
 
 ## Features
 
-- ⚡ **Vite** for fast development and building
-- ⚛️ **React 18** with TypeScript
-- 🎨 **Tailwind CSS** for utility-first styling
-- 🧩 **shadcn/ui** component library (Radix UI primitives)
-- 🌙 **Dark theme** optimized design system
-- 🖥️ **Electron** for cross-platform desktop apps
-- 📦 **Reusable layout primitives** for rapid UI development
+- **Electron** - Cross-platform desktop application
+- **React 18** - Modern UI framework with hooks
+- **Vite** - Fast build tool and dev server
+- **TypeScript** - Type-safe development
+- **React Router** - Client-side routing
+- **SQLite Database** - Local data persistence with better-sqlite3
+- **IPC Data Services** - Secure database access via IPC handlers
+- **Dark Theme** - Professional dark mode interface
+- **Modular Architecture** - Organized folder structure
 
 ## Project Structure
 
 ```
-project/
+nexus-os/
 ├── src/
-│   ├── components/
-│   │   ├── ui/              # shadcn/ui base components
-│   │   ├── primitives/      # Reusable UI patterns (Panel, FormControl, Modal)
-│   │   └── layouts/         # Layout components (AppLayout, SplitLayout)
-│   ├── lib/
-│   │   └── utils.ts         # Utility functions (cn helper)
-│   ├── styles/
-│   │   └── globals.css      # Global styles and theme tokens
-│   ├── App.tsx              # Main application component
-│   └── main.tsx             # React entry point
-├── electron/
-│   ├── main.ts              # Electron main process
-│   └── preload.ts           # Electron preload script
-├── tailwind.config.js       # Tailwind configuration
-├── postcss.config.js        # PostCSS configuration
-├── components.json          # shadcn/ui configuration
-├── vite.config.ts           # Vite configuration
-├── tsconfig.json            # TypeScript configuration
-└── UI_DOCUMENTATION.md      # Comprehensive UI documentation
+│   ├── main/          # Electron main process
+│   │   ├── database/  # Database service and IPC handlers
+│   │   │   ├── database-service.ts
+│   │   │   ├── ipc-handlers.ts
+│   │   │   └── schema.ts
+│   │   └── main.ts
+│   ├── preload/       # Preload scripts with contextBridge
+│   │   └── preload.ts
+│   ├── renderer/      # React application
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── styles/
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   └── shared/        # Shared types and utilities
+│       ├── database-types.ts
+│       └── types.ts
+├── assets/            # Application assets
+├── public/            # Public static files
+├── DATABASE_API.md    # Database API documentation
+└── dist/              # Production build output
 ```
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 18+ 
+- npm or yarn
 
 ### Installation
 
@@ -52,157 +57,120 @@ npm install
 
 ### Development
 
-#### Web Development Mode
+Start the development server with hot-reload:
+
 ```bash
 npm run dev
 ```
-Opens the app in a browser at `http://localhost:5173` for rapid UI development.
-
-#### Electron Development Mode
-```bash
-npm run electron:dev
-```
-Builds and runs the Electron application.
 
 ### Building
 
-#### Web Build
+Build for production:
+
 ```bash
+# Build for current platform
 npm run build
+
+# Build for Windows
+npm run build:win
+
+# Build unpacked directory (for testing)
+npm run build:dir
 ```
 
-#### Electron Build
-```bash
-npm run electron:build
-```
-Creates platform-specific installers in the `release/` directory.
+### Available Scripts
 
-### Type Checking
+- `npm run dev` - Start development server
+- `npm run build` - Build production version
+- `npm run build:win` - Build Windows installer
+- `npm run type-check` - Run TypeScript type checking
+- `npm run lint` - Run ESLint
 
-```bash
-npm run type-check
-```
+## Database
 
-## UI Component Library
+The application includes a fully-featured SQLite database layer with IPC services:
 
-### Core Components
-- **Button** - Multiple variants (default, outline, ghost, destructive, etc.)
-- **Input & Textarea** - Form inputs with consistent styling
-- **Label** - Accessible form labels
-- **Card** - Content containers with header/footer
-- **Dialog** - Modal dialogs
-- **Dropdown Menu** - Context menus and dropdowns
-- **Tabs** - Tabbed interfaces
+### Data Models
 
-### Primitive Components
-- **Panel** - Flexible container with variants (default, elevated, bordered, ghost)
-- **FormControl** - Form fields with labels, hints, and validation
-- **FormField** - Complete input fields with label and error handling
-- **FormTextarea** - Complete textarea fields with label and error handling
-- **Modal** - Preconfigured modal dialogs
-- **ConfirmModal** - Confirmation dialogs with actions
+- **Projects** - Project management with status tracking
+- **Tasks** - Task tracking with priorities, statuses, and labels
+- **Pages** - Hierarchical pages/documentation
+- **Creators** - Team members/users
+- **Meeting Notes** - Meeting records linked to projects
+- **Reports** - Project reports and documents
+- **Labels** - Tags for categorizing tasks
 
-### Layout Components
-- **AppLayout** - Main app layout with sidebar, header, and footer
-- **SplitLayout** - Two-panel layout (horizontal or vertical)
+### Usage
 
-## Styling System
+All database operations are accessible through `window.electronAPI.database` in the renderer process. See [DATABASE_API.md](DATABASE_API.md) for complete documentation and examples.
 
-### Theme Tokens
-All colors use CSS custom properties defined in `src/styles/globals.css`:
-- `--background`, `--foreground`
-- `--primary`, `--secondary`, `--accent`
-- `--muted`, `--destructive`
-- `--border`, `--input`, `--ring`
+### Database Location
 
-### Utility Classes
-- `scrollbar-thin` - Styled scrollbars for dark theme
-- `drag-none` / `drag-cancel` - Electron window dragging
-- Animation classes: `animate-fade-in`, `animate-slide-in-from-*`
+The SQLite database is automatically created in the Electron userData directory:
+- Windows: `%APPDATA%/nexus-os/nexus-os.db`
+- macOS: `~/Library/Application Support/nexus-os/nexus-os.db`
+- Linux: `~/.config/nexus-os/nexus-os.db`
 
-### Color Usage
-Always use semantic color classes:
-```tsx
-// Good ✅
-<div className="bg-background text-foreground border-border">
+### Seed Data
 
-// Bad ❌
-<div className="bg-slate-900 text-white border-slate-700">
-```
+The database is automatically initialized with sample data including projects, tasks, team members, and more.
 
-## Adding Components
+## Modules
 
-### From shadcn/ui
-```bash
-npx shadcn-ui@latest add [component-name]
-```
+The application includes navigation stubs for the following modules:
 
-Example:
-```bash
-npx shadcn-ui@latest add select
-npx shadcn-ui@latest add checkbox
-```
+- **Dashboard** - System overview and quick access
+- **Projects** - Project management with database integration
+- **Tasks** - Task tracking with database integration
+- **File Manager** - Browse and manage system files
+- **Terminal** - Command-line interface
+- **Process Monitor** - Monitor and manage system processes
+- **Network Tools** - Network diagnostics and monitoring
+- **Settings** - Application configuration
 
-### Custom Components
-1. Create in appropriate directory (`ui/`, `primitives/`, or `layouts/`)
-2. Use TypeScript with proper types
-3. Support `className` prop for customization
-4. Export from index file
+## Architecture
 
-## Documentation
+### Main Process
 
-See [UI_DOCUMENTATION.md](./UI_DOCUMENTATION.md) for comprehensive documentation including:
-- Complete component API reference
-- Styling conventions and best practices
-- Animation and transition patterns
-- Electron-specific styling
-- Common UI patterns and examples
-- Troubleshooting guide
+The Electron main process (`src/main/main.ts`) handles:
+- Window creation and management
+- Application lifecycle
+- Database initialization and management
+- IPC handlers for database operations
+- System-level operations
 
-## Configuration Files
+### Database Layer
 
-- **tailwind.config.js** - Tailwind theme extensions (colors, animations, keyframes)
-- **postcss.config.js** - PostCSS with Tailwind and Autoprefixer
-- **components.json** - shadcn/ui configuration
-- **vite.config.ts** - Vite bundler configuration with React plugin
-- **tsconfig.json** - TypeScript with path aliases (`@/*`)
+The database layer (`src/main/database/`) provides:
+- SQLite database with better-sqlite3
+- Schema definition and migrations
+- CRUD operations for all data models
+- Validation and error handling
+- Seed data for development
 
-## Path Aliases
+### Preload Script
 
-Import using the `@/` prefix:
-```tsx
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { Panel } from "@/components/primitives"
-```
+The preload script (`src/preload/preload.ts`) uses `contextBridge` to safely expose APIs to the renderer process:
+- Version information
+- Platform detection
+- Database operations (all CRUD methods)
 
-## Tech Stack
+### Renderer Process
 
-- **Electron** - Desktop application framework
-- **React 18** - UI library
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **shadcn/ui** - Component library
-- **Radix UI** - Accessible component primitives
-- **Lucide React** - Icon library
-- **class-variance-authority** - Component variant management
-- **tailwind-merge** - Tailwind class merging utility
+The React application runs in the renderer process with:
+- Component-based architecture
+- React Router for navigation
+- Database API access via window.electronAPI
+- CSS modules for styling
+- TypeScript for type safety
 
-## Best Practices
+## Security
 
-1. **Component Composition** - Build complex UIs from simple, reusable components
-2. **Type Safety** - Always use TypeScript interfaces for props
-3. **Semantic Colors** - Use theme tokens, not hardcoded colors
-4. **Accessibility** - Include proper labels and ARIA attributes
-5. **Dark Theme First** - Design for dark mode by default
-6. **Consistent Spacing** - Use Tailwind's spacing scale
-7. **Subtle Animations** - Use transitions for better UX (0.2-0.3s)
+- Context isolation enabled
+- Node integration disabled
+- Sandbox mode enabled
+- Controlled API exposure via contextBridge
 
 ## License
 
-ISC
-
-## Contributing
-
-Contributions are welcome! Please read the UI_DOCUMENTATION.md for styling guidelines and component patterns.
+MIT

@@ -1,16 +1,18 @@
 # Dependencies
 node_modules/
-.pnp
+/.pnp
 .pnp.js
 
-# Production builds
+# Production
 dist/
 dist-electron/
-build/
 out/
-release/
+build/
 
-# Environment variables
+# Testing
+coverage/
+
+# Environment
 .env
 .env.local
 .env.development.local
@@ -24,6 +26,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
 # Editor directories and files
 .vscode/*
@@ -36,11 +39,11 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-# Testing
-coverage/
-
 # Electron
+release/
 *.tsbuildinfo
 
-# OS
-Thumbs.db
+# Database files (stored in user data directory, not in repo)
+*.db
+*.db-shm
+*.db-wal
