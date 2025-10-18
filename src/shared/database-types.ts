@@ -17,6 +17,14 @@ export interface Task {
   due_date: string | null
   created_at: string
   updated_at: string
+  assignee_id?: number
+  position?: number
+}
+
+export interface TaskWithMetadata extends Task {
+  labels?: Label[]
+  assignee?: Creator
+  project?: Project
 }
 
 export interface Page {
