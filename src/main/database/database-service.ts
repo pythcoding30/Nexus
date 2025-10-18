@@ -4,13 +4,16 @@ import { app } from 'electron'
 import { initializeSchema, seedDatabase } from './schema'
 import {
   Project, Task, Page, Creator, MeetingNote, Report, Label,
+  CreatorNote, PerformanceReport,
   CreateProject, UpdateProject,
   CreateTask, UpdateTask,
   CreatePage, UpdatePage,
   CreateCreator, UpdateCreator,
   CreateMeetingNote, UpdateMeetingNote,
   CreateReport, UpdateReport,
-  CreateLabel
+  CreateLabel,
+  CreateCreatorNote, UpdateCreatorNote,
+  CreatePerformanceReport, UpdatePerformanceReport
 } from '../../shared/database-types'
 
 class DatabaseService {
@@ -553,6 +556,130 @@ class DatabaseService {
     const db = this.ensureDb()
     const result = db.prepare('UPDATE project_members SET role = ? WHERE project_id = ? AND creator_id = ?').run(role, projectId, creatorId)
     return result.changes > 0
+  }
+
+  getCreatorNotes(creatorId: number): CreatorNote[] {
+    const db = this.ensureDb()
+    return db.prepare('SELECT * FROM creator_notes WHERE creator_id = ? ORDER BY created_at DESC').all(creatorId) as CreatorNote[]
+  }
+
+  getCreatorNote(id: number): CreatorNote | undefined {
+    const db = this.ensureDb()
+    return db.prepare('SELECT * FROM creator_notes WHERE id = ?').get(id) as CreatorNote | undefined
+  }
+
+  createCreatorNote(data: CreateCreatorNote): CreatorNote {
+    const db = this.ensureDb()
+    const stmt = db.prepare(`
+      INSERT INTO creator_notes (creator_id, title, content)
+      VALUES (?, ?, ?)
+    `)
+    const result = stmt.run(data.creator_id, data.title, data.content)
+    return this.getCreatorNote(result.lastInsertRowid as number)!
+  }
+
+  updateCreatorNote(id: number, data: UpdateCreatorNote): CreatorNote | undefined {
+    const db = this.ensureDb()
+    const updates: string[] = []
+    const values: unknown[] = []
+
+    if (data.title !== undefined) {
+      updates.push('title = ?')
+      values.push(data.title)
+    }
+    if (data.content !== undefined) {
+      updates.push('content = ?')
+      values.push(data.content)
+    }
+
+    if (updates.length === 0) {
+      return this.getCreatorNote(id)
+    }
+
+    updates.push("updated_at = datetime('now')")
+    values.push(id)
+
+    const stmt = db.prepare(`
+      UPDATE creator_notes
+      SET ${updates.join(', ')}
+      WHERE id = ?
+    `)
+    stmt.run(...values)
+    return this.getCreatorNote(id)
+  }
+
+  deleteCreatorNote(id: number): boolean {
+    const db = this.ensureDb()
+    const result = db.prepare('DELETE FROM creator_notes WHERE id = ?').run(id)
+    return result.changes > 0
+  }
+
+  getPerformanceReports(creatorId: number): PerformanceReport[] {
+    const db = this.ensureDb()
+    return db.prepare('SELECT * FROM performance_reports WHERE creator_id = ? ORDER BY uploaded_at DESC').all(creatorId) as PerformanceReport[]
+  }
+
+  getPerformanceReport(id: number): PerformanceReport | undefined {
+    const db = this.ensureDb()
+    return db.prepare('SELECT * FROM performance_reports WHERE id = ?').get(id) as PerformanceReport | undefined
+  }
+
+  createPerformanceReport(data: CreatePerformanceReport): PerformanceReport {
+    const db = this.ensureDb()
+    const stmt = db.prepare(`
+      INSERT INTO performance_reports (creator_id, title, description, file_name, file_path, file_size, file_type)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `)
+    const result = stmt.run(
+      data.creator_id,
+      data.title,
+      data.description,
+      data.file_name,
+      data.file_path,
+      data.file_size,
+      data.file_type
+    )
+    return this.getPerformanceReport(result.lastInsertRowid as number)!
+  }
+
+  updatePerformanceReport(id: number, data: UpdatePerformanceReport): PerformanceReport | undefined {
+    const db = this.ensureDb()
+    const updates: string[] = []
+    const values: unknown[] = []
+
+    if (data.title !== undefined) {
+      updates.push('title = ?')
+      values.push(data.title)
+    }
+    if (data.description !== undefined) {
+      updates.push('description = ?')
+      values.push(data.description)
+    }
+
+    if (updates.length === 0) {
+      return this.getPerformanceReport(id)
+    }
+
+    values.push(id)
+
+    const stmt = db.prepare(`
+      UPDATE performance_reports
+      SET ${updates.join(', ')}
+      WHERE id = ?
+    `)
+    stmt.run(...values)
+    return this.getPerformanceReport(id)
+  }
+
+  deletePerformanceReport(id: number): boolean {
+    const db = this.ensureDb()
+    const result = db.prepare('DELETE FROM performance_reports WHERE id = ?').run(id)
+    return result.changes > 0
+  }
+
+  getTasksByAssignee(creatorId: number): Task[] {
+    const db = this.ensureDb()
+    return db.prepare('SELECT * FROM tasks WHERE assignee_id = ? ORDER BY created_at DESC').all(creatorId) as Task[]
   }
 }
 
