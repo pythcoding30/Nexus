@@ -1,53 +1,30 @@
-# Nexus OS
+# Knowledge Base Application
 
-A modern Electron + React application shell with modular architecture and dark theme.
+A desktop application for managing hierarchical knowledge base pages with rich text editing capabilities.
 
 ## Features
 
-- **Electron** - Cross-platform desktop application
-- **React 18** - Modern UI framework with hooks
-- **Vite** - Fast build tool and dev server
-- **TypeScript** - Type-safe development
-- **React Router** - Client-side routing
-- **SQLite Database** - Local data persistence with better-sqlite3
-- **IPC Data Services** - Secure database access via IPC handlers
-- **Dark Theme** - Professional dark mode interface
-- **Modular Architecture** - Organized folder structure
+- **Hierarchical Page Structure**: Organize pages in predefined sections with unlimited sub-pages
+- **Rich Text Editor**: TipTap-based editor with dark mode support
+- **SQLite Persistence**: All data stored locally in SQLite database
+- **Autosave**: Automatic saving with visual feedback
+- **CRUD Operations**: Create, rename, reorder, and delete pages
+- **Tree Navigation**: Collapsible tree view for easy navigation
+- **Page Metadata**: Track creation/modification timestamps and author
 
-## Project Structure
+## Technology Stack
 
-```
-nexus-os/
-├── src/
-│   ├── main/          # Electron main process
-│   │   ├── database/  # Database service and IPC handlers
-│   │   │   ├── database-service.ts
-│   │   │   ├── ipc-handlers.ts
-│   │   │   └── schema.ts
-│   │   └── main.ts
-│   ├── preload/       # Preload scripts with contextBridge
-│   │   └── preload.ts
-│   ├── renderer/      # React application
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── styles/
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   └── shared/        # Shared types and utilities
-│       ├── database-types.ts
-│       └── types.ts
-├── assets/            # Application assets
-├── public/            # Public static files
-├── DATABASE_API.md    # Database API documentation
-└── dist/              # Production build output
-```
+- **Frontend**: React with TypeScript
+- **Editor**: TipTap (ProseMirror-based)
+- **Desktop Framework**: Electron
+- **Database**: SQLite (better-sqlite3)
+- **Build Tools**: Webpack, TypeScript
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm or yarn
+- Node.js 18+ and npm
 
 ### Installation
 
@@ -57,119 +34,108 @@ npm install
 
 ### Development
 
-Start the development server with hot-reload:
+Build and run in development mode:
 
 ```bash
-npm run dev
-```
-
-### Building
-
-Build for production:
-
-```bash
-# Build for current platform
 npm run build
-
-# Build for Windows
-npm run build:win
-
-# Build unpacked directory (for testing)
-npm run build:dir
+npm start
 ```
 
-### Available Scripts
+For development with hot reload (requires running in separate terminals):
 
-- `npm run dev` - Start development server
-- `npm run build` - Build production version
-- `npm run build:win` - Build Windows installer
-- `npm run type-check` - Run TypeScript type checking
-- `npm run lint` - Run ESLint
+```bash
+# Terminal 1: Build main process
+npm run dev:main
 
-## Database
+# Terminal 2: Build renderer process
+npm run dev:renderer
 
-The application includes a fully-featured SQLite database layer with IPC services:
+# Terminal 3: Start Electron
+npm start
+```
 
-### Data Models
+### Building for Production
 
-- **Projects** - Project management with status tracking
-- **Tasks** - Task tracking with priorities, statuses, and labels
-- **Pages** - Hierarchical pages/documentation
-- **Creators** - Team members/users
-- **Meeting Notes** - Meeting records linked to projects
-- **Reports** - Project reports and documents
-- **Labels** - Tags for categorizing tasks
+```bash
+npm run build
+npm start
+```
 
-### Usage
+## Project Structure
 
-All database operations are accessible through `window.electronAPI.database` in the renderer process. See [DATABASE_API.md](DATABASE_API.md) for complete documentation and examples.
+```
+src/
+├── main/                 # Electron main process
+│   ├── main.ts          # Main entry point
+│   ├── database.ts      # SQLite database management
+│   ├── ipc-handlers.ts  # IPC communication handlers
+│   └── preload.ts       # Preload script for context bridge
+├── renderer/            # React application
+│   ├── components/      # React components
+│   │   ├── KnowledgeBase.tsx    # Main application component
+│   │   ├── NavigationTree.tsx   # Tree navigation panel
+│   │   ├── RichTextEditor.tsx   # TipTap editor wrapper
+│   │   ├── PageMetadata.tsx     # Metadata display
+│   │   └── Modal.tsx            # Reusable modal dialog
+│   ├── App.tsx          # Root React component
+│   ├── index.tsx        # React entry point
+│   ├── index.html       # HTML template
+│   └── styles.css       # Global styles
+└── shared/              # Shared types and utilities
+    └── types.ts         # TypeScript type definitions
+```
 
-### Database Location
+## Database Schema
 
-The SQLite database is automatically created in the Electron userData directory:
-- Windows: `%APPDATA%/nexus-os/nexus-os.db`
-- macOS: `~/Library/Application Support/nexus-os/nexus-os.db`
-- Linux: `~/.config/nexus-os/nexus-os.db`
+### Sections Table
+- `id`: Unique identifier for predefined sections
+- `title`: Section display name
+- `order`: Display order
 
-### Seed Data
+### Pages Table
+- `id`: Unique identifier
+- `title`: Page title
+- `content`: Rich text content (HTML)
+- `parent_id`: Parent page/section ID (nullable)
+- `order`: Display order within parent
+- `created_at`: Creation timestamp
+- `updated_at`: Last modification timestamp
+- `author`: Page author (placeholder)
 
-The database is automatically initialized with sample data including projects, tasks, team members, and more.
+## Default Sections
 
-## Modules
+The application comes with four predefined top-level sections:
+1. Getting Started
+2. Documentation
+3. Guides
+4. References
 
-The application includes navigation stubs for the following modules:
+## IPC API
 
-- **Dashboard** - System overview and quick access
-- **Projects** - Project management with database integration
-- **Tasks** - Task tracking with database integration
-- **File Manager** - Browse and manage system files
-- **Terminal** - Command-line interface
-- **Process Monitor** - Monitor and manage system processes
-- **Network Tools** - Network diagnostics and monitoring
-- **Settings** - Application configuration
+The application exposes the following IPC methods:
 
-## Architecture
+- `kb:getSections()`: Get all sections
+- `kb:getAllPages()`: Get all pages
+- `kb:getPage(id)`: Get a specific page
+- `kb:getChildPages(parentId)`: Get child pages
+- `kb:createPage(params)`: Create a new page
+- `kb:updatePage(params)`: Update a page
+- `kb:deletePage(id)`: Delete a page
+- `kb:reorderPage(params)`: Reorder/move a page
 
-### Main Process
+## Development
 
-The Electron main process (`src/main/main.ts`) handles:
-- Window creation and management
-- Application lifecycle
-- Database initialization and management
-- IPC handlers for database operations
-- System-level operations
+### Type Checking
 
-### Database Layer
+```bash
+npm run typecheck
+```
 
-The database layer (`src/main/database/`) provides:
-- SQLite database with better-sqlite3
-- Schema definition and migrations
-- CRUD operations for all data models
-- Validation and error handling
-- Seed data for development
+### Linting
 
-### Preload Script
-
-The preload script (`src/preload/preload.ts`) uses `contextBridge` to safely expose APIs to the renderer process:
-- Version information
-- Platform detection
-- Database operations (all CRUD methods)
-
-### Renderer Process
-
-The React application runs in the renderer process with:
-- Component-based architecture
-- React Router for navigation
-- Database API access via window.electronAPI
-- CSS modules for styling
-- TypeScript for type safety
-
-## Security
-
-- Context isolation enabled
-- Node integration disabled
-- Sandbox mode enabled
-- Controlled API exposure via contextBridge
+```bash
+npm run lint
+```
 
 ## License
 
